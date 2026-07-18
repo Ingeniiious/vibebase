@@ -29,6 +29,15 @@ WIZARD_PORT="${WIZARD_PORT:-8642}"
 REPO_URL_DEFAULT="https://github.com/Ingeniiious/vibebase.git"
 VIBE_REPO_URL="${VIBE_REPO_URL:-$REPO_URL_DEFAULT}"
 
+# Console source (the studio fork) ships as a GitHub release asset, not in git,
+# to keep the repo small. Pinned by tag + sha256 (both hardcoded so a tampered
+# or truncated download is rejected). Overridable via env for testing.
+STUDIO_SRC_TAG="${STUDIO_SRC_TAG:-v0.1.0-beta}"
+STUDIO_SRC_ASSET="vibebase-studio-src.tar.gz"
+STUDIO_SRC_URL="${STUDIO_SRC_URL:-https://github.com/Ingeniiious/vibebase/releases/download/${STUDIO_SRC_TAG}/${STUDIO_SRC_ASSET}}"
+STUDIO_SRC_SHA256="${STUDIO_SRC_SHA256:-189fa2bb97a46038a555da3a966e6090f7feeadbae8c1939482687b3256adf05}"
+STUDIO_FORK_DIR="$SRC_DIR/studio-fork"
+
 DRY_RUN=0
 FORCE_WIZARD=0
 for arg in "$@"; do
@@ -255,6 +264,53 @@ phase_sources() {
   fi
   [ -f "$SRC_DIR/infra/bootstrap/wizard/wizard.py" ] || die "sources incomplete under $SRC_DIR (wizard.py missing)"
   stamp sources
+}
+
+# =============================================================================
+# Phase b2 — console source (the studio fork)
+#
+# The dashboard source is a fork of Supabase Studio, too large to keep in git,
+# so it ships as a pinned GitHub release asset. Fetch it, verify its sha256
+# against the hardcoded digest (rejects a tampered/truncated download), and
+# extract it to $SRC_DIR/studio-fork — exactly where deploy-stack.sh's
+# studio_build step (`--working-directory=$SRC/studio-fork`) expects it. The
+# repo only carries a placeholder studio-fork/README.md until this runs.
+# =============================================================================
+phase_studio_src() {
+  if [ -f "$STUDIO_FORK_DIR/apps/studio/Dockerfile" ] && stamped studio_src; then
+    log "phase b2: console source already present in $STUDIO_FORK_DIR — skipping"; return 0
+  fi
+  if [ "$DRY_RUN" = 1 ]; then
+    cat <<EOF
+  [plan] download $STUDIO_SRC_URL
+  [plan] verify sha256 == $STUDIO_SRC_SHA256 (abort on mismatch)
+  [plan] extract (strip 1) -> $STUDIO_FORK_DIR   [then deploy builds apps/studio/Dockerfile]
+EOF
+    return 0
+  fi
+  log "phase b2: fetch + verify console source (studio-fork) release asset"
+  command -v curl >/dev/null 2>&1 || {
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -qq && apt-get install -y -qq curl >/dev/null
+  }
+  mkdir -p "$STUDIO_FORK_DIR"
+  local tmp="$STATE_DIR/${STUDIO_SRC_ASSET}"
+  log "  downloading $STUDIO_SRC_URL"
+  curl -fSL --retry 3 --retry-delay 2 -o "$tmp" "$STUDIO_SRC_URL" \
+    || die "console source download failed: $STUDIO_SRC_URL"
+  # Verify integrity BEFORE trusting the archive.
+  if ! echo "${STUDIO_SRC_SHA256}  ${tmp}" | sha256sum -c - >/dev/null 2>&1; then
+    local got; got="$(sha256sum "$tmp" 2>/dev/null | awk '{print $1}')"
+    rm -f "$tmp"
+    die "console source checksum mismatch (expected $STUDIO_SRC_SHA256, got ${got:-none}) — refusing to build"
+  fi
+  log "  sha256 OK — extracting to $STUDIO_FORK_DIR"
+  # Tarball has a single top-level dir (vibebase-studio-src/); strip it so the
+  # tree lands directly under studio-fork/.
+  tar -xzf "$tmp" -C "$STUDIO_FORK_DIR" --strip-components=1 || die "console source extract failed"
+  rm -f "$tmp"
+  [ -f "$STUDIO_FORK_DIR/apps/studio/Dockerfile" ] || die "console source incomplete after extract (apps/studio/Dockerfile missing)"
+  stamp studio_src
 }
 
 # =============================================================================
@@ -523,6 +579,7 @@ main() {
   [ "$DRY_RUN" = 1 ] || mkdir -p "$STATE_DIR"
   phase_preflight
   phase_sources
+  phase_studio_src
   phase_docker
   phase_harden
   phase_networks
