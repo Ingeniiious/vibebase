@@ -1,0 +1,25 @@
+# Console route — written by the wizard to /data/coolify/proxy/dynamic/console.yaml.
+# Placeholders: {base_domain}, {domains_block}
+#   {domains_block} is empty for HTTP-01; for DNS-01 it pins the wildcard cert:
+#         domains:
+#           - main: "{base_domain}"
+#             sans: ["*.{base_domain}"]
+http:
+  routers:
+    console-https:
+      entryPoints: [https]
+      rule: "Host(`console.{base_domain}`)"
+      service: studio-console
+      tls:
+        certresolver: letsencrypt
+{domains_block}
+    console-http:
+      entryPoints: [http]
+      rule: "Host(`console.{base_domain}`)"
+      middlewares: [redirect-to-https]
+      service: studio-console
+  services:
+    studio-console:
+      loadBalancer:
+        servers:
+          - url: http://studio-console:3000

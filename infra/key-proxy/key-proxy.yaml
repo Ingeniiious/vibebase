@@ -1,0 +1,9 @@
+# Shared key-proxy service (sb_publishable_/sb_secret_ -> role-JWT translation
+# shim) used by the <ref>-api.yaml routers. Defined once here — duplicate
+# service definitions across Traefik dynamic files are a config error.
+http:
+  services:
+    key-proxy:
+      loadBalancer:
+        servers:
+          - url: http://key-proxy:8080

@@ -1,0 +1,9 @@
+# Base Traefik dynamic config — installed to /data/coolify/proxy/dynamic/.
+# Defines the shared redirect-to-https middleware referenced by every
+# generated route (console.yaml, <ref>-api.yaml).
+http:
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true

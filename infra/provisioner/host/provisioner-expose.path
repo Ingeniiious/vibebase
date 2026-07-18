@@ -1,0 +1,8 @@
+[Unit]
+Description=Watch /root/provisioner-expose.d for provisioner expose changes
+[Path]
+PathModified=/root/provisioner-expose.d
+PathChanged=/root/provisioner-expose.d
+Unit=provisioner-expose-sync.service
+[Install]
+WantedBy=multi-user.target

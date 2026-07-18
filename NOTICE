@@ -1,0 +1,17 @@
+Vibe Base
+Copyright (c) 2026 Vibe Base contributors
+
+Licensed under the Apache License, Version 2.0.
+
+This product includes and deploys software developed by third parties:
+
+- Supabase Studio and other Supabase open-source components (GoTrue,
+  Storage API, Realtime), (c) Supabase Inc., Apache License 2.0
+  (https://github.com/supabase/supabase). "Supabase" is a trademark of
+  Supabase Inc.; this project is not affiliated with or endorsed by
+  Supabase Inc.
+- PostgREST, MIT License (https://github.com/PostgREST/postgrest)
+- PostgreSQL and pgvector, PostgreSQL License / pgvector license
+- Traefik, MIT License (https://github.com/traefik/traefik)
+- tecnativa/docker-socket-proxy, Apache License 2.0
+- Better Auth, MIT License (https://github.com/better-auth/better-auth)

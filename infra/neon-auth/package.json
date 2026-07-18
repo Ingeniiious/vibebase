@@ -1,0 +1,17 @@
+{
+  "name": "vibe-neon-auth",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Neon-Auth-compatible auth service (self-hosted Better Auth) for Vibe Base",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "better-auth": "1.6.23",
+    "pg": "8.22.0"
+  },
+  "devDependencies": {
+    "pg-mem": "3.0.14"
+  }
+}

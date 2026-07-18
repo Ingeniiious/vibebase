@@ -1,0 +1,7 @@
+[Unit]
+Description=Sync provisioner-managed socat exposes (systemd units + ufw)
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/provisioner-expose-sync.sh
+[Install]
+WantedBy=multi-user.target

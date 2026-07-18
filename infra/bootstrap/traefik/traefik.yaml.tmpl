@@ -1,0 +1,31 @@
+# Traefik v3 static config — written by the setup wizard (TLS step) to
+# /data/coolify/proxy/traefik.yaml. Standalone Traefik with a file provider;
+# the network name and dynamic dir are the canonical values every generated
+# route template expects (Coolify-compatible paths, no Coolify required).
+#
+# Placeholders: {acme_email}, {challenge_block}
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+
+providers:
+  file:
+    directory: /data/coolify/proxy/dynamic
+    watch: true
+  # NO docker provider on purpose: routes come only from files our scripts
+  # write, so a compromised container cannot self-register a route.
+
+api:
+  dashboard: false
+
+log:
+  level: INFO
+
+certificatesResolvers:
+  letsencrypt:            # name is hardcoded in every generated router
+    acme:
+      email: "{acme_email}"
+      storage: /acme.json
+{challenge_block}
