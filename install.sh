@@ -32,10 +32,10 @@ VIBE_REPO_URL="${VIBE_REPO_URL:-$REPO_URL_DEFAULT}"
 # Console source (the studio fork) ships as a GitHub release asset, not in git,
 # to keep the repo small. Pinned by tag + sha256 (both hardcoded so a tampered
 # or truncated download is rejected). Overridable via env for testing.
-STUDIO_SRC_TAG="${STUDIO_SRC_TAG:-v0.1.0-beta}"
+STUDIO_SRC_TAG="${STUDIO_SRC_TAG:-v0.1.1-beta}"
 STUDIO_SRC_ASSET="vibebase-studio-src.tar.gz"
 STUDIO_SRC_URL="${STUDIO_SRC_URL:-https://github.com/Ingeniiious/vibebase/releases/download/${STUDIO_SRC_TAG}/${STUDIO_SRC_ASSET}}"
-STUDIO_SRC_SHA256="${STUDIO_SRC_SHA256:-189fa2bb97a46038a555da3a966e6090f7feeadbae8c1939482687b3256adf05}"
+STUDIO_SRC_SHA256="${STUDIO_SRC_SHA256:-5628ef5fcde4325bdaef061d6f2838a15aea9f10e31d9fee923ab54b746c05a6}"
 STUDIO_FORK_DIR="$SRC_DIR/studio-fork"
 
 DRY_RUN=0
